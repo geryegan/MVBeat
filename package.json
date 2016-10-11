@@ -1,0 +1,17 @@
+{
+  "name": "dankbeats",
+  "version": "1.0.0",
+  "description": "dank beats",
+  "main": "app.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "keywords": [
+    "idk"
+  ],
+  "author": "gery",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "express": "^4.14.0"
+  }
+}
