@@ -13,20 +13,27 @@ var destLine = new Path.Line({
     strokeColor: '#EB4511',
     strokeWidth: 10
 })
+var text = new PointText(new Point(1316, 191));
+text.content = 'MVBeat';
+text.characterStyle = {
+   fontSize: 35,
+   fontFamily: 'Audiowide',
+   fillColor: 'black',
+};
 
 var innerPlay;
 
- setInterval(function(){
+ // setInterval(function(){
 				
-			for(var i = 0; i < sounds.length; i++){	
+	// 		for(var i = 0; i < sounds.length; i++){	
 
-				if(sounds[i].rowIndex === currentCol){
-						sounds[i].strokeColor= '#EB4511';
-					} else {
-						sounds[i].strokeColor= '#E1F2FE';
-					}
-				}
-			},10)
+	// 			if(sounds[i].rowIndex === currentCol){
+	// 					sounds[i].strokeColor= '#EB4511';
+	// 				} else {
+	// 					sounds[i].strokeColor= '#E1F2FE';
+	// 				}
+	// 			}
+	// 		},10)
 console.log(sounds);
 var muteRow = function(sound){
 	for(var i = 0; i < sounds.length; i++){
@@ -42,32 +49,40 @@ var unmuteRow = function(sound){
 		}
 	}
 }
-var play = function(){
 
+var play = function(){
+	
 	
 	innerPlay = setInterval(function(){
-				
-				for(var i = 0; i < sounds.length; i++){	
-
-					if(sounds[i].rowIndex === currentCol){
-						sounds[i].strokeColor= '#EB4511';
+			console.log('called interval')
+				sounds.forEach(function(sound){
+					if(sound.rowIndex === currentCol){
+						sound.strokeColor= '#EB4511';
 					}
 					else{
-						sounds[i].strokeColor= '#E1F2FE';
+						sound.strokeColor= '#E1F2FE';
 					}
+				})
 				
-				
+				for(var i = 0; i < sounds.length; i++){					
 					if(sounds[i].rowIndex === currentCol && sounds[i].toggle){
-						
+
 						sounds[i].sound.play();
 					}
 				}
 				if (currentCol < 15){
 					currentCol++;
 				} else {currentCol = 0;}
+
+				paper.project._needsUpdate = true;
+    			paper.project.view.update();
+				
 			}, 125);
 		
 	}
+
+
+			
 var stop = function(){
 	clearInterval(innerPlay);
 }
@@ -76,6 +91,9 @@ var kick = new Howl({
 });	
 var hat = new Howl({
   src: ['sounds/hat.wav']
+});	
+var clhat = new Howl({
+  src: ['sounds/clhat.wav']
 });	
 var clap = new Howl({
   src: ['sounds/clap.wav']
@@ -113,7 +131,7 @@ var rowCreator = function(yCoord, sound, row){
 		
 		sounds.push(stepRect);
 		rowIndex++;
-		stepRect.onClick = function(e){
+		stepRect.onMouseDown = function(e){
 			if (this.toggle === false){
 				this.fillColor = '#ADFCF9';
 				this.toggle = true;
@@ -129,42 +147,45 @@ var rowCreator = function(yCoord, sound, row){
 	}
 }
 
-var kickRow = rowCreator(35, kick,0);
-var clapRow = rowCreator(135, clap,1);
-var hatRow = rowCreator(235, hat,2);
-var chordRow = rowCreator(335, chord,3);
-var chordTwoRow = rowCreator(435, chordTwo,4);
-var bassRow = rowCreator(535, bass,5);
-var stab = rowCreator(635, stab,6);
-
-var muteRect = new Path.Rectangle({
-			point: [1245,35],
+var muteButtonMaker = function(yCoord, sound, row){
+	var muteRect = new Path.Rectangle({
+			point: [1245,yCoord],
 			size: [50,80.9],
 			fillColor: '#31D843',
 			strokeColor: '#E1F2FE',
 			strokeWidth: 3,
 			muteToggle: false,
-			sound: kick,
+			sound: sound,
 			mute: function(){
 					for(var i = 0; i < sounds.length; i++){
 						
-						if (sounds[i].row === 0){
-							sounds[i].sound.mute([true]);
-							this.fillColor = '#BCC1BA'
+						if (sounds[i].row === row){
+							console.log(sounds[i].sound)
+							sounds[i].sound._muted = true;
+							this.fillColor = '#BCC1BA';
+							if(sounds[i].toggle === true){
+								sounds[i].fillColor = '#3066BE';
+							} else {
+								sounds[i].fillColor = '#BCC1BA';
+							}
 						}
 					}
 				},
 			unmute: function(){
 					for(var i = 0; i < sounds.length; i++){
-						if (sounds[i].row === 0){
-							sounds[i].sound.mute([false]);
+						if (sounds[i].row === row){
+							sounds[i].sound._muted = false;
 							this.fillColor = '#31D843'
+							if(sounds[i].toggle === true){
+								sounds[i].fillColor = '#ADFCF9';
+							} else {
+								sounds[i].fillColor = '#30323D';
+							}							
 						}
 					}
 				},
 		})
-
-muteRect.onClick = function(e){
+	muteRect.onMouseDown = function(e){
 	if (this.muteToggle){
 		this.unmute();
 		this.muteToggle = false;
@@ -172,6 +193,33 @@ muteRect.onClick = function(e){
 		this.muteToggle = true;
 	}
 }
+
+}  
+
+
+var kickRow = rowCreator(35, kick, 0);
+var kickMute = muteButtonMaker(35, kick,  0);
+
+var clapRow = rowCreator(135, clap, 1);
+var clapMute = muteButtonMaker(135, clap, 1);
+
+var hatRow = rowCreator(235, hat, 2);
+var hatMute = muteButtonMaker(235, hat, 2);
+
+var clHatRow = rowCreator(335, clhat, 3);
+var clHatMute = muteButtonMaker(335, hat, 3);
+
+var chordRow = rowCreator(435, chord, 4);
+var chordMute = muteButtonMaker(435, chord, 4);
+
+var chordTwoRow = rowCreator(535, chordTwo, 5);
+var chordTwoMute = muteButtonMaker(535, chordTwo, 5);
+
+var bassRow = rowCreator(635, bass, 6);
+var bassMute = muteButtonMaker(635, bass, 6);
+
+var stab = rowCreator(735, stab, 7);
+var stabMute = muteButtonMaker(735, stab, 7);
 
 	function onKeyDown(event){
 
@@ -210,7 +258,29 @@ muteRect.onClick = function(e){
 
 		}
 	};
-console.log('we out here')
+var playButton = new Path.RegularPolygon({
+    center: [1395,85],
+    sides: 3,
+    radius: 40,
+	fillColor: '#30323D',
+	strokeColor: '#E1F2FE',
+	strokeWidth: 3
+});
 
+playButton.rotate(90);
+
+playButton.onMouseDown = function(e){
+	playState = !playState;
+	console.log('clicked')
+	if(playState){
+		this.fillColor = '#31D843'
+		play();
+	} else {
+		this.fillColor = '#30323D';
+		stop();
+		currentCol = 0;
+	}
+
+}
 
 
