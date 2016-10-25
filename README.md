@@ -10,3 +10,5 @@ Click or touch any rectangle to toggle the sound.
 Hit the play button or press 'P' to play the loop.
 
 Click or touch any green rectangle to mute/unmute a track. 
+
+visit http://mvbeat.herokuapp.com/ to try it out.
